@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f7ecdf">
+<title>Mochi — your cozy companion</title>
+<style>
+  :root{
+    --cream:#f7ecdf; --ink:#3a2d28; --blush:#f4c3c1; --mint:#cdeee0; --honey:#e9c08c;
+    --accent:#e59a9a; --accent2:#a7c9a8; --card:#fffaf3; --muted:#8d7b70;
+    --dawn1:#ffe9d6; --day1:#dff0f5; --dusk1:#f6cfc6; --night1:#2a2c3a;
+    --shadow:0 14px 40px rgba(120,90,70,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:var(--cream); color:var(--ink); min-height:100vh; overflow-x:hidden;}
+  .app{max-width:440px; margin:0 auto; padding:16px 16px 40px;}
+  header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .brand{font-size:22px; font-weight:900; letter-spacing:-.6px;}
+  .brand em{color:var(--accent); font-style:normal;}
+  .petname{font-size:12px; color:var(--muted); margin-top:2px;}
+  .pill{background:var(--card); border:1px solid #ecd9c8; border-radius:30px; padding:6px 12px; font-size:12px; color:var(--muted); font-weight:600;}
+  /* HERO */
+  .hero{position:relative; border-radius:28px; overflow:hidden; min-height:340px; box-shadow:var(--shadow); display:flex; align-items:center; justify-content:center; flex-direction:column; transition:background 1s ease; background:linear-gradient(180deg,var(--day1),#fff);
+    padding-bottom:10px;}
+  .scene-glow{position:absolute; inset:0; pointer-events:none;}
+  .mood{position:absolute; top:14px; left:0; right:0; text-align:center; font-size:13px; font-weight:800; letter-spacing:.3px;}
+  .weather{position:absolute; top:14px; right:16px; font-size:11px; color:var(--muted); background:rgba(255,255,255,.7); border-radius:12px; padding:4px 8px; font-weight:600;}
+  .pet-wrap{position:relative; width:190px; height:190px; margin-top:22px;}
+  .pet{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; animation:idle 3.4s ease-in-out infinite;}
+  .head{position:relative; width:130px; height:118px; background:radial-gradient(circle at 38% 32%, #fffdf7, #f4e6d8 78%); border:3px solid #e6cbb2; border-radius:46% 46% 48% 48%; box-shadow:inset 0 -6px 14px rgba(180,140,110,.25);}
+  .ear{position:absolute; z-index:-1;}
+  .ear.cat-l,.ear.cat-r{top:-16px; width:30px; height:30px; background:#f4e6d8; border:3px solid #e6cbb2; clip-path:polygon(50% 0,100% 100%,0 100%);}
+  .ear.cat-l{left:-2px; transform:rotate(-12deg);} .ear.cat-r{right:-2px; transform:rotate(12deg);}
+  .ear.dog-l,.ear.dog-r{top:-6px; width:26px; height:40px; background:#eedcc9; border:3px solid #e6cbb2; border-radius:50%;}
+  .ear.dog-l{left:-12px;} .ear.dog-r{right:-12px;}
+  .ear.bun-l,.ear.bun-r{top:-30px; width:22px; height:48px; background:#f7e9dd; border:3px solid #e6cbb2; border-radius:50%;}
+  .ear.bun-l{left:26px;} .ear.bun-r{right:26px;}
+  .eye{position:absolute; top:36px; width:18px; height:22px; background:#33282e; border-radius:50%; transform-origin:center; transition:transform .12s; box-shadow:inset 0 0 0 0;}
+  .eye.l{left:30px;} .eye.r{right:30px;}
+  .eye::after{content:''; position:absolute; top:3px; left:4px; width:6px; height:6px; background:#fff; border-radius:50%; opacity:.9;}
+  .eye.blink{transform:scaleY(.1);}
+  .cheek{position:absolute; top:60px; width:18px; height:10px; background:var(--blush); border-radius:50%; opacity:.85;}
+  .cheek.l{left:20px;} .cheek.r{right:20px;}
+  .mouth{position:absolute; top:64px; left:50%; transform:translateX(-50%); width:20px; height:10px; border-bottom:3px solid #33282e; border-radius:50%;}
+  .mouth.o{width:22px; height:14px; border:3px solid #33282e; border-radius:50%; background:#33282e;}
+  .acc{position:absolute; z-index:2; font-size:30px; pointer-events:none; filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));}
+  /* care buttons */
+  .care{display:flex; gap:10px; margin-top:18px; position:relative; z-index:3;}
+  .care button{font:inherit; cursor:pointer; border:none; background:var(--card); color:var(--ink); border-radius:30px; padding:9px 14px; font-weight:700; font-size:13px; box-shadow:var(--shadow); transition:.15s;}
+  .care button:active{transform:scale(.94);}
+  .care button.acc{background:var(--accent); color:#fff;}
+  /* sparkles */
+  .sparkle{position:absolute; font-size:12px; opacity:0; pointer-events:none; animation:rise 2s ease forwards;}
+  /* floating hearts */
+  .heart{position:absolute; font-size:20px; opacity:0; animation:rise 1.6s ease forwards;}
+  @keyframes idle{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(1deg)}}
+  @keyframes rise{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(-58px);opacity:0}}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+  .pet.bounce{animation:bounce .6s ease 2;}
+  .pet.shake{animation:shake .4s ease 2;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  /* cards */
+  .card{background:var(--card); border:1px solid #ecd9c8; border-radius:22px; padding:15px; margin-top:14px; box-shadow:var(--shadow);}
+  .card h3{font-size:13px; letter-spacing:.4px; text-transform:uppercase; color:var(--muted); margin-bottom:9px; font-weight:800;}
+  .day-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .stat{background:#faf1e7; border-radius:14px; padding:9px 11px;}
+  .stat .k{font-size:11px; color:var(--muted);} .stat .v{font-size:16px; font-weight:900;}
+  /* drop */
+  .drop-row{display:flex; align-items:center; gap:12px;}
+  .drop-art{font-size:40px;}
+  .drop-info{flex:1;} .drop-name{font-weight:900; font-size:16px;}
+  .drop-rarity{font-size:11px; font-weight:800; color:#fff; border-radius:10px; padding:2px 8px; display:inline-block; margin-top:3px;}
+  .drop-count{font-size:12px; color:var(--muted); margin-top:4px;}
+  .drop .claim{font:inherit;cursor:pointer;border:none;background:var(--accent);color:#fff;border-radius:30px;padding:9px 15px;font-weight:800;font-size:13px;}
+  .drop .claim:disabled{opacity:.5;cursor:default;}
+  /* accessory rack */
+  .rack{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;}
+  .rack button{font:inherit;cursor:pointer;border:1px solid #e3d0bd;background:#fdf6ee;border-radius:14px;padding:7px 10px;font-size:15px;transition:.15s;}
+  .rack button:active{transform:scale(.92);background:var(--blush);}
+  .meta{font-size:11px;color:var(--muted);text-align:center;margin-top:20px;}
+  .a{color:var(--accent);}
+  .status{font-size:12px; color:var(--muted); min-height:16px; margin-top:6px; text-align:center;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <div class="brand">Mochi<em>.</em></div>
+      <div class="petname" id="petname">your cozy companion · <span id="species">Cat</span></div>
+    </div>
+    <div class="pill" id="clock">—</div>
+  </header>
+
+  <div class="hero" id="hero">
+    <div class="scene-glow" id="glow"></div>
+    <div class="mood" id="mood">hello ☀️</div>
+    <div class="weather" id="weather">weather…</div>
+    <div class="pet-wrap">
+      <div class="pet" id="pet">
+        <div class="head" id="head">
+          <div class="acc" id="accLayer"></div>
+        </div>
+      </div>
+    </div>
+    <div class="care">
+      <button id="feedBtn">🍓 Feed</button>
+      <button id="playBtn">🎾 Play</button>
+      <button id="petBtn">🤍 Pet</button>
+      <button class="acc" id="studioBtn">✏️ Studio</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Now</h3>
+    <div class="day-grid">
+      <div class="stat"><div class="k">time of day</div><div class="v" id="phaseV">day</div></div>
+      <div class="stat"><div class="k">weather</div><div class="v" id="weatherV">clear</div></div>
+      <div class="stat"><div class="k">temp</div><div class="v" id="tempV">—</div></div>
+      <div class="stat"><div class="k">mood</div><div class="v" id="moodV">chill</div></div>
+    </div>
+  </div>
+
+  <div class="card drop" id="dropCard">
+    <h3>Daily drop</h3>
+    <div class="drop-row">
+      <div class="drop-art" id="dropArt">🎀</div>
+      <div class="drop-info">
+        <div class="drop-name" id="dropName">Bowtie</div>
+        <span class="drop-rarity" id="dropRarity">limited</span>
+        <div class="drop-count" id="dropCount">resets in —</div>
+      </div>
+      <button class="claim" id="claimBtn">Claim</button>
+    </div>
+    <div class="status" id="dropStatus">&nbsp;</div>
+  </div>
+
+  <div class="card">
+    <h3>Quick accessories</h3>
+    <div class="rack" id="rack"></div>
+  </div>
+
+  <div class="meta">Mochi · your companion pet · lives on this device · tap Studio for the full editor · v1</div>
+</div>
+
+<script>
+const PETS={cat:{e:'🐱',label:'Cat'},dog:{e:'🐶',label:'Dog'},bird:{e:'🐦',label:'Bird'},bunny:{e:'🐰',label:'Bunny'},dino:{e:'🦕',label:'Dino'}};
+const EAR={cat:['cat-l','cat-r'],dog:['dog-l','dog-r'],bunny:['bun-l','bun-r'],bird:[],dino:[]};
+const ACCESSORIES={hat:'🎩',glasses:'🕶️',bowtie:'🎀',crown:'👑',headphones:'🎧',scarf:'🧣',flower:'🌸',star:'⭐',sparkle:'✨',mochi:'🍡'};
+const ACC_POS={hat:{left:'50%',top:'-6%'},glasses:{left:'50%',top:'32%'},bowtie:{left:'50%',top:'78%'},crown:{left:'50%',top:'-18%'},headphones:{left:'50%',top:'-8%'},scarf:{left:'50%',top:'70%'},flower:{left:'20%',top:'10%'},star:{left:'80%',top:'6%'},sparkle:{left:'70%',top:'24%'},mochi:{left:'16%',top:'30%'}};
+const DROPS={bowtie:{name:'Bowtie',art:'🎀',rarity:'limited'},crown:{name:'Crown',art:'👑',rarity:'rare'},sparkle:{name:'Sparkles',art:'✨',rarity:'rare'},mochi:{name:'Mochi charm',art:'🍡',rarity:'common'}};
+
+let petState={pet:'cat',accessories:[],behaviors:[]};
+let mochi={care:{feed:0,play:0,pet:0},dropped:{}};
+
+const $=id=>document.getElementById(id);
+const base=localStorage.getItem('petforge.state');
+try{if(base){const o=JSON.parse(base);if(o&&PETS[o.pet])petState=o;}}catch(e){}
+const mc=localStorage.getItem('mochi.care');try{if(mc)mochi={...mochi,...JSON.parse(mc)};}catch(e){}
+const md=localStorage.getItem('mochi.dropped');try{if(md)mochi.dropped=JSON.parse(md)||{};}catch(e){}
+function persistCare(){localStorage.setItem('mochi.care',JSON.stringify(mochi.care));localStorage.setItem('mochi.dropped',JSON.stringify(mochi.dropped));}
+
+// ---- clock + ambient ----
+function tick(){
+  const d=new Date(); const h=d.getHours();
+  let phase, mood, bg;
+  if(h>=5&&h<8){phase='dawn';mood='waking up 🌅';bg=['var(--dawn1)','#fff'];}
+  else if(h>=8&&h<17){phase='day';mood='alert & happy ☀️';bg=['var(--day1)','#fff'];}
+  else if(h>=17&&h<20){phase='dusk';mood='cozy 🧡';bg=['var(--dusk1)','#fff'];}
+  else{phase='night';mood='sleepy 🌙';bg=['var(--night1)','#3a3f52'];}
+  $('hero').style.background=`linear-gradient(180deg,${bg[0]},${bg[1]})`;
+  $('phaseV').textContent=phase;
+  $('clock').textContent=d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  $('mood').textContent = phase==='night' ? 'shhh, sleeping 🌙' : mood;
+  return {phase,h};
+}
+
+// ---- weather (Open-Meteo, free, graceful fallback) ----
+function setWeather(v,t,c){
+  $('weather').textContent=v+' · '+t+'\u00b0';
+  $('weatherV').textContent=v;
+  $('tempV').textContent=t+'\u00b0F';
+  return v;
+}
+async function fetchWeather(){
+  let lat=37.4, lon=-121.9;
+  try{
+    const g=await fetch('https://ipwho.is/'); if(g.ok){const j=await g.json(); if(j.success&&j.latitude){lat=j.latitude;lon=j.longitude;}}
+  }catch(e){}
+  try{
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=auto&temperature_unit=fahrenheit`);
+    if(!r.ok)throw 0;
+    const j=await r.json(); const c=j.current; const code=c.weather_code;
+    const w = code===0?'clear':(code<3?'partly':(code<45?('rain'+(code>=65?'!':'')):'stormy'));
+    $('weather').dataset.live='1';
+    setWeather(w,Math.round(c.temperature_2m),''); setMoodW(w);
+  }catch(e){
+    setWeather('cozy','—',''); // offline default
+  }
+}
+function setMoodW(w){
+  const map={clear:'bright ☀️',partly:'chill ☁️',rain:'moody 🌧️','rain!':'rainy 🌧️',stormy:'cosy & curled up ⛈️'};
+  // gentle: we adjust the small mood label, not overwrite caret
+}
+
+// ---- pet render ----
+function renderPet(){
+  const head=$('head');
+  // species ears
+  head.querySelectorAll('.ear').forEach(x=>x.remove());
+  (EAR[petState.pet]||[]).forEach(c=>{const s=document.createElement('span');s.className='ear '+c;head.appendChild(s);});
+  // accessories
+  const l=$('accLayer'); l.innerHTML='';
+  (petState.accessories||[]).forEach(a=>{if(!ACCESSORIES[a])return;const s=document.createElement('span');s.className='acc';s.textContent=ACCESSORIES[a];s.style.left=ACC_POS[a].left;s.style.top=ACC_POS[a].top;l.appendChild(s);});
+  $('petname').innerHTML='your cozy companion · '+PETS[petState.pet].label;
+}
+function blink(){
+  document.querySelectorAll('.eye').forEach(e=>e.classList.add('blink'));
+  setTimeout(()=>document.querySelectorAll('.eye').forEach(e=>e.classList.remove('blink')),140);
+}
+setInterval(blink,3400);
+function spawn(emoji,cls){
+  const pet=$('pet-wrap')||document.querySelector('.pet-wrap');
+  const w=$('hero');
+  const h=document.createElement('span'); h.className=cls; h.textContent=emoji;
+  h.style.left=(40+Math.random()*45)+'%'; h.style.top=(30+Math.random()*40)+'%';
+  w.appendChild(h); setTimeout(()=>h.remove(),2000);
+}
+function care(kind){
+  const p=$('pet');
+  mochi.care[kind]===undefined?0:mochi.care[kind]++; persistCare();
+  if(kind==='feed'){spawn('🍓','heart'); p.classList.remove('bounce');void p.offsetWidth;p.classList.add('bounce');setStatus('yum!');}
+  if(kind==='play'){spawn('🎾','heart');p.classList.remove('shake');void p.offsetWidth;p.classList.add('shake');setStatus('wheee!');}
+  if(kind==='pet'){spawn('💗','heart');p.classList.remove('bounce');void p.offsetWidth;p.classList.add('bounce');setStatus('purrrr…');}
+}
+function setStatus(t){$('mood').textContent=t;setTimeout(()=>{tick();},1800);}
+
+// ---- daily drop ----
+function nextDrop(){
+  const now=new Date(); const tz=(6*60); // 6pm local
+  let next=new Date(now); next.setHours(18,0,0,0);
+  if(now>next) next.setDate(next.getDate()+1);
+  return next-now;
+}
+function renderDrop(){
+  const d=new Date().getDate()%4; const keys=Object.keys(DROPS); const key=keys[d];
+  const D=DROPS[key];
+  $('dropArt').textContent=D.art;
+  $('dropName').textContent=D.name;
+  const r=$('dropRarity'); r.textContent=D.rarity;
+  r.style.background = D.rarity==='limited'?'#e59a9a':(D.rarity==='rare'?'#b08ad6':'#a7c9a8');
+  const claimed=!!mochi.dropped[key];
+  const b=$('claimBtn');
+  b.disabled=claimed; b.textContent=claimed?'Claimed':`Claim ${D.name}`;
+  const cd=setInterval(()=>{
+    const ms=nextDrop(); const h=Math.floor(ms/36e5),m=Math.floor(ms%36e5/6e4);
+    $('dropCount').textContent=`resets in ${h}h ${m}m`;
+  },1000);
+  $('claimBtn').onclick=()=>{
+    if(mochi.dropped[key])return;
+    mochi.dropped[key]=new Date().toISOString(); persistCare();
+    if(!petState.accessories.includes(key))petState.accessories.push(key);
+    localStorage.setItem('petforge.state',JSON.stringify(petState));
+    renderPet(); renderDrop();
+    $('dropStatus').textContent='✓ '+D.name+' added to '+PETS[petState.pet].label+' · saved to your pet config';
+    spawn(D.art,'heart'); setStatus('new drop!');
+    setTimeout(()=>{$('dropStatus').textContent='\u00a0';},4000);
+  };
+}
+
+// ---- rack (quick add) ----
+function renderRack(){
+  const r=$('rack'); r.innerHTML='';
+  Object.keys(ACCESSORIES).forEach(k=>{
+    if(petState.accessories.includes(k))return;
+    const b=document.createElement('button'); b.textContent=ACCESSORIES[k]+' '+k;
+    b.onclick=()=>{petState.accessories.push(k);localStorage.setItem('petforge.state',JSON.stringify(petState));renderPet();renderRack();setStatus('added '+k);};
+    r.appendChild(b);
+  });
+}
+
+// studio link opens the workshop editor in same origin
+$('studioBtn').onclick=()=>{location.href='index.html';};
+
+// face
+function buildFace(){
+  const head=$('head');
+  const el=document.createElement('div');el.className='eye l';head.appendChild(el);
+  const er=document.createElement('div');er.className='eye r';head.appendChild(er);
+  const cl=document.createElement('div');cl.className='cheek l';head.appendChild(cl);
+  const cr=document.createElement('div');cr.className='cheek r';head.appendChild(cr);
+  const m=document.createElement('div');m.className='mouth';head.appendChild(m);
+}
+
+buildFace();
+tick(); renderPet(); renderRack(); renderDrop(); fetchWeather();
+$('feedBtn').onclick=()=>care('feed');
+$('playBtn').onclick=()=>care('play');
+$('petBtn').onclick=()=>care('pet');
+setInterval(()=>tick(),30000);
+</script>
+</body>
+</html>
