@@ -114,12 +114,20 @@
       <textarea class="code" id="codeArea" spellcheck="false"></textarea>
       <div class="status" id="status">&nbsp;</div>
       <div class="footer">
+        <button id="saveZooBtn">♡ Save to zoo</button>
         <button id="applyBtn">Apply script</button>
       </div>
     </div>
   </div>
 
-  <div class="meta">Prototype · Pet Forge · export = the pet config you'd load onto the circuit board · v1</div>
+  <div class="card" style="margin-top:16px;">
+    <h2>My pets <span style="text-transform:none; color:var(--muted); font-weight:500;">— saved zoo</span></h2>
+    <div class="colon" id="zoo" style="min-height:40px;">
+      <span style="color:var(--muted); font-size:12px; align-self:center;">Save pets to your zoo. They persist on this device.</span>
+    </div>
+  </div>
+
+  <div class="meta">Prototype · Pet Forge · auto-saves as you edit · export = the pet config you'd load onto the circuit board · v2</div>
 
 <script>
 const PETS = {
@@ -267,7 +275,35 @@ function syncAll(){
   renderPlay();
   renderCodeView();
   syncTextarea();
+  persist();
+  renderZoo();
 }
+
+// ---- persistence + zoo ----
+const PF_KEY='petforge.state', PF_ZOO='petforge.zoo';
+function persist(){ try{ localStorage.setItem(PF_KEY, JSON.stringify(state)); }catch(e){} }
+function getZoo(){ try{ return JSON.parse(localStorage.getItem(PF_ZOO)||'[]'); }catch(e){ return []; } }
+function saveZoo(){
+  const zoo=getZoo();
+  zoo.push({at:Date.now(), pet:state.pet, accessories:(state.accessories||[]).slice(), behaviors:(state.behaviors||[]).slice()});
+  localStorage.setItem(PF_ZOO, JSON.stringify(zoo));
+  renderZoo(); setStatus('✓ saved to your zoo', true);
+}
+function renderZoo(){
+  const el=document.getElementById('zoo'); el.innerHTML='';
+  const zoo=getZoo();
+  if(!zoo.length){ el.innerHTML='<span style="color:var(--muted);font-size:12px;align-self:center;">Save pets to your zoo. They persist on this device.</span>'; return; }
+  zoo.forEach((p,i)=>{
+    const c=document.createElement('button'); c.className='chip'; c.title='Click to load';
+    c.innerHTML=PETS[p.pet]?PETS[p.pet].emoji+' '+PETS[p.pet].label:'❓ pet['+(i+1)+']';
+    c.onclick=()=>{ state={pet:PETS[p.pet]?p.pet:'cat', accessories:(p.accessories||[]).slice(), behaviors:(p.behaviors||[]).slice()}; syncAll(); setStatus('loaded '+ (PETS[p.pet]?PETS[p.pet].label:'pet'), true); };
+    el.appendChild(c);
+  });
+  const clear=document.createElement('button'); clear.className='chip'; clear.textContent='🗑 clear';
+  clear.onclick=()=>{ localStorage.removeItem(PF_ZOO); renderZoo(); };
+  el.appendChild(clear);
+}
+function restore(){ const s=localStorage.getItem(PF_KEY); if(s){ try{ const o=JSON.parse(s); if(o&&PETS[o.pet]){ state={pet:o.pet, accessories:(o.accessories||[]).slice(), behaviors:(o.behaviors||[]).slice()}; } }catch(e){} } }
 
 // ---- animations / behavior firing ----
 function sceneReset(){
@@ -341,9 +377,11 @@ document.getElementById('exportBtn').onclick=()=>{
 };
 document.getElementById('applyBtn').onclick=applyScript;
 
+restore();
 syncAll();
 buildPalette();
 buildSelections();
+document.getElementById('saveZooBtn').onclick=saveZoo;
 </script>
 </body>
 </html>
